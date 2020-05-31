@@ -77,6 +77,8 @@ target 'Esp32BleRN' do
   pod 'glog', :podspec => '../node_modules/react-native/third-party-podspecs/glog.podspec'
   pod 'Folly', :podspec => '../node_modules/react-native/third-party-podspecs/Folly.podspec'
 
+  pod 'react-native-ble-plx', :path => '../node_modules/react-native-ble-plx'
+
   target 'Esp32BleRNTests' do
     inherit! :complete
     # Pods for testing
