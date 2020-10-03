@@ -23,9 +23,8 @@ The app make possible :
   
 # Layout APP
 
-  - ![image](https://user-images.githubusercontent.com/60005589/94996210-883fdb00-0579-11eb-962f-8ec38ec3fcce.png)
-  ![image](https://user-images.githubusercontent.com/60005589/94996216-9857ba80-0579-11eb-9b21-9924e68d91d5.png)
-  ![image](https://user-images.githubusercontent.com/60005589/94996225-a73e6d00-0579-11eb-90f7-be7b7238a9d7.png)
+- ![WhatsApp Image 2020-10-03 at 13 20 10 (1)](https://user-images.githubusercontent.com/60005589/94996506-7eb77280-057b-11eb-92fd-ebb2a341ecae.jpeg)
+  ![WhatsApp Image 2020-10-03 at 13 20 10](https://user-images.githubusercontent.com/60005589/94996508-8119cc80-057b-11eb-8220-5c70b455953e.jpeg)
   
 # Communication via Arduino IDE
 
