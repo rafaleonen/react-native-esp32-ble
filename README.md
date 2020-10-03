@@ -2,6 +2,12 @@
 
 This is a project do realize hardware and app mobile integration through bluetooth
 
+# Libs and Frameworks
+  - React Native -> Main tech to development
+  - React Native Base 64 -> Code and decode messages to base64
+  - React Native Ble Plx -> Connect and communicate esp32 with device
+  - React Navigation -> Make possible stack navigation
+
 # Functions
 
 The app make possible :
