@@ -1,153 +1,154 @@
-import React, { useState, useEffect } from 'react'
-import { View, Text, TouchableOpacity, Switch, FlatList, PermissionsAndroid, ActivityIndicator, Modal, Alert, TextInput, ScrollView } from 'react-native'
-import Feather from "react-native-feather1s"
-import { BleManager } from 'react-native-ble-plx'
-import base64 from 'react-native-base64'
+/* eslint-disable prettier/prettier */
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, Switch, FlatList, PermissionsAndroid, ActivityIndicator, Modal, Alert, TextInput, ScrollView } from 'react-native';
+import Feather from 'react-native-feather1s';
+import { BleManager } from 'react-native-ble-plx';
+import base64 from 'react-native-base64';
 
-import styles from './styles'
+import styles from './styles';
 
 export default function App() {
-  const [isEnable, setIsEnable] = useState(false)
-  const [isScanning, setIsScanning] = useState(false)
-  const [deviceList, setDeviceList] = useState([])
-  const [connectedDevice, setConnectedDevice] = useState({})
-  const [isConnected, setIsConnected] = useState(false)
+  const [isEnable, setIsEnable] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [deviceList, setDeviceList] = useState([]);
+  const [connectedDevice, setConnectedDevice] = useState({});
+  const [isConnected, setIsConnected] = useState(false);
 
-  const [deviceID, setDeviceID] = useState('')
-  const [serviceID, setServiceID] = useState('')
-  const [characteristicID, setCharacteristicID] = useState('')
+  const [deviceID, setDeviceID] = useState('');
+  const [serviceID, setServiceID] = useState('');
+  const [characteristicID, setCharacteristicID] = useState('');
 
-  const [sendCommand, setSendCommand] = useState('')
-  const [receiveCommand, setReceiveCommand] = useState('')
+  const [sendCommand, setSendCommand] = useState('');
+  const [receiveCommand, setReceiveCommand] = useState('');
 
-  const manager = new BleManager
-
-  async function verifyStatus() {
-    const result = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION)
-    if (!result) {
-      await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION)
-    }
-    const status = await manager.state()
-    if (status === 'PoweredOn') setIsEnable(true)
-    if (status === 'PoweredOff') setIsEnable(false)
-  }
+  const manager = new BleManager();
 
   async function toogleStatus() {
     try {
       if (isEnable) {
-        await manager.disable()
-        setIsScanning(false)
-        setIsEnable(false)
-        setIsConnected(false)
+        await manager.disable();
+        setIsScanning(false);
+        setIsEnable(false);
+        setIsConnected(false);
       }
       else {
-        await manager.enable()
-        setIsEnable(true)
+        await manager.enable();
+        setIsEnable(true);
       }
     }
     catch (err) {
-      console.log(err)
+      console.log(err);
     }
   }
 
   async function startScanDevices() {
-    setIsScanning(true)
+    setIsScanning(true);
 
-    let list = deviceList.slice()
+    let list = deviceList.slice();
 
     manager.startDeviceScan(null, null, (err, device) => {
-      if (err) return
+      if (err) {return;}
 
-      const hasID = list.some(elem => elem.id == device.id)
+      const hasID = list.some(elem => elem.id === device.id);
 
       if (!hasID) {
-        list.push(device)
-        setDeviceList(list)
+        list.push(device);
+        setDeviceList(list);
       }
-    })
+    });
 
   }
 
   async function stopScanDevices() {
-    setIsScanning(false)
-    manager.stopDeviceScan()
+    setIsScanning(false);
+    manager.stopDeviceScan();
   }
 
 
   async function connect(device) {
 
-    await device.connect()
+    await device.connect();
 
-    setIsConnected(true)
+    setIsConnected(true);
 
-    setDeviceID(device.id)
+    setDeviceID(device.id);
 
-    await device.discoverAllServicesAndCharacteristics()
-    const services = await device.services()
+    await device.discoverAllServicesAndCharacteristics();
+    const services = await device.services();
 
     services.forEach(async (srv) => {
       if (srv.uuid.startsWith('c00fa')) {
-        const customService = srv.uuid
+        const customService = srv.uuid;
 
-        setServiceID(customService)
+        setServiceID(customService);
 
-        console.log(customService)
+        console.log(customService);
 
-        const characteristics = await device.characteristicsForService(customService)
+        const characteristics = await device.characteristicsForService(customService);
 
         characteristics.forEach(chrt => {
           if (chrt.uuid.startsWith('c00fa')) {
-            const customCharacteristic = chrt.uuid
+            const customCharacteristic = chrt.uuid;
 
-            setCharacteristicID(customCharacteristic)
+            setCharacteristicID(customCharacteristic);
 
-            console.log(customCharacteristic)
+            console.log(customCharacteristic);
 
-            setConnectedDevice(device)
+            setConnectedDevice(device);
 
-            setTimeout(() => startMonitoring(), 100)
+            setTimeout(() => startMonitoring(), 100);
           }
-        })
+        });
       }
     });
   }
 
   async function disconnect() {
     try {
-      manager.cancelTransaction('LISTEN')
-      const device = connectedDevice
-      await device.cancelConnection()
-      setIsConnected(false)
+      manager.cancelTransaction('LISTEN');
+      const device = connectedDevice;
+      await device.cancelConnection();
+      setIsConnected(false);
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
   }
 
   function notAvailableAlert() {
-    Alert.alert('Aviso :', ('Não foi possível se conectar a esse dispositivo!'))
+    Alert.alert('Aviso :', ('Não foi possível se conectar a esse dispositivo!'));
   }
 
   async function writeCommand() {
-    manager.cancelTransaction('LISTEN')
-    const encodedCommand = base64.encode(sendCommand)
-    await manager.writeCharacteristicWithoutResponseForDevice(deviceID, serviceID, characteristicID, encodedCommand)
-    setTimeout(() => startMonitoring(), 200)
+    manager.cancelTransaction('LISTEN');
+    const encodedCommand = base64.encode(sendCommand);
+    await manager.writeCharacteristicWithoutResponseForDevice(deviceID, serviceID, characteristicID, encodedCommand);
+    setTimeout(() => startMonitoring(), 200);
   }
 
   function startMonitoring() {
     manager.monitorCharacteristicForDevice(deviceID, serviceID, characteristicID, (err, rxSerial) => {
       if (err) {
-        console.log(err)
+        console.log(err);
       } else {
-        const decodedCommad = base64.decode(rxSerial.value)
-        setReceiveCommand(decodedCommad)
+        const decodedCommad = base64.decode(rxSerial.value);
+        setReceiveCommand(decodedCommad);
       }
-    }, 'LISTEN')
+    }, 'LISTEN');
   }
 
   useEffect(() => {
-    verifyStatus()
-  }, [])
+    async function verifyStatus() {
+      const result = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION);
+      if (!result) {
+        await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_COARSE_LOCATION);
+      }
+      const status = await manager.state();
+      if (status === 'PoweredOn') {setIsEnable(true);}
+      if (status === 'PoweredOff') {setIsEnable(false);}
+    }
+
+    verifyStatus();
+  }, [manager]);
 
   return (
     <View style={isScanning ? styles.opacityContainer : styles.container}>
@@ -162,7 +163,7 @@ export default function App() {
         <View style={styles.loadingContainer}>
           <ActivityIndicator
             size={80}
-            color='#FFA707'
+            color="#FFA707"
             marginBottom={20}
           />
           <TouchableOpacity
@@ -203,9 +204,9 @@ export default function App() {
                     onPress={fDevice.name ? () => connect(fDevice) : notAvailableAlert}
                     style={styles.actionDevice}
                   >
-                    <Feather name="bluetooth" size={22} color='#FFA707' />
+                    <Feather name="bluetooth" size={22} color="#FFA707" />
                     <Text style={styles.deviceText}>{fDevice.name ? fDevice.name : 'Sem nome'}</Text>
-                    <Feather name="link" size={22} color='#FFA707' />
+                    <Feather name="link" size={22} color="#FFA707" />
                   </TouchableOpacity>
                 )}
               />
@@ -226,9 +227,9 @@ export default function App() {
               onPress={disconnect}
               style={styles.actionDevice}
             >
-              <Feather name="bluetooth" size={22} color='#FFA707' />
+              <Feather name="bluetooth" size={22} color="#FFA707" />
               <Text style={styles.deviceText}>{connectedDevice.name}</Text>
-              <Feather name="x-circle" size={22} color='#FFA707' />
+              <Feather name="x-circle" size={22} color="#FFA707" />
             </TouchableOpacity>
             <View style={styles.detailContainer}>
               <Text><Text style={styles.featured}>ID do Serviço : </Text> {serviceID}</Text>
@@ -246,14 +247,13 @@ export default function App() {
               <View style={styles.viewRow}>
                 <TextInput
                   style={styles.txtInput}
-                  placeholder='Digita o comando aqui...'
+                  placeholder="Digita o comando aqui..."
                   onChangeText={(val) => setSendCommand(val)}
-                >
-                </TextInput>
+                 />
                 <TouchableOpacity
                   onPress={writeCommand}
                 >
-                  <Feather name="send" size={30} color='#FFA707' />
+                  <Feather name="send" size={30} color="#FFA707" />
                 </TouchableOpacity>
               </View>
 
@@ -262,5 +262,5 @@ export default function App() {
         )}
       </ScrollView>
     </View>
-  )
+  );
 }
